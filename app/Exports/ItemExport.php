@@ -13,22 +13,25 @@ class ItemExport implements FromCollection, WithHeadings, WithMapping, WithStyle
 {
     public function collection()
     {
-        return Item::with('category')->orderBy('item_code')->get();
+        return Item::with(['category', 'departments'])->orderBy('item_code')->get();
     }
 
     public function headings(): array
     {
-        return ['Kode Item', 'Kategori', 'Nama Item', 'Satuan', 'Harga Satuan', 'Status'];
+        return ['Kode Item', 'Kategori', 'Nama Item', 'Satuan', 'Harga Satuan', 'Departemen (Kode dipisah koma)', 'Status'];
     }
 
     public function map($item): array
     {
+        $deptCodes = $item->departments->pluck('dept_code')->implode(', ');
+
         return [
             $item->item_code,
             $item->category->category_name ?? '-',
             $item->item_name,
             $item->unit,
             $item->unit_price,
+            $deptCodes,
             $item->status === 'active' ? 'Aktif' : 'Tidak Aktif',
         ];
     }

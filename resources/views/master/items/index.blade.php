@@ -237,7 +237,8 @@
                 <div class="modal-body p-4">
                     <div class="mb-3" style="background:rgba(88,166,255,.08);border:1px solid rgba(88,166,255,.2);border-radius:10px;padding:14px;font-size:12px;color:var(--text-secondary);">
                         <strong class="text-accent-blue">Format Kolom:</strong><br>
-                        kode_item | kategori | nama_item | satuan | harga_satuan
+                        kode_item | kategori | nama_item | satuan | harga_satuan | departemen
+                        <div class="text-muted mt-1">*Departemen dipisah koma (contoh: PROD, ENG)</div>
                     </div>
                     <input type="file" name="file" class="form-control form-control-dark" accept=".xls,.xlsx,.csv" required>
                 </div>
