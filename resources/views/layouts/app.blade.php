@@ -329,6 +329,9 @@
         <a href="{{ route('master.departments.index') }}" class="sidebar-item {{ request()->routeIs('master.departments.*') ? 'active' : '' }}">
             <i class="bi bi-building nav-icon"></i><span class="sidebar-label">Departemen</span>
         </a>
+        <a href="{{ route('master.categories.index') }}" class="sidebar-item {{ request()->routeIs('master.categories.*') ? 'active' : '' }}">
+            <i class="bi bi-tags nav-icon"></i><span class="sidebar-label">Kategori Item</span>
+        </a>
         <a href="{{ route('master.items.index') }}" class="sidebar-item {{ request()->routeIs('master.items.*') ? 'active' : '' }}">
             <i class="bi bi-box-seam nav-icon"></i><span class="sidebar-label">Master Item</span>
         </a>

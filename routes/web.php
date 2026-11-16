@@ -51,6 +51,14 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/import', [ItemController::class, 'import'])->name('import');
     });
 
+    // Master Data - Item Categories
+    Route::prefix('master/categories')->name('master.categories.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\ItemCategoryController::class, 'index'])->name('index');
+        Route::post('/', [\App\Http\Controllers\ItemCategoryController::class, 'store'])->name('store');
+        Route::put('/{category}', [\App\Http\Controllers\ItemCategoryController::class, 'update'])->name('update');
+        Route::delete('/{category}', [\App\Http\Controllers\ItemCategoryController::class, 'destroy'])->name('destroy');
+    });
+
     // Budget Plans
     Route::prefix('budget/plans')->name('budget.plans.')->group(function () {
         Route::get('/', [BudgetPlanController::class, 'index'])->name('index');

@@ -1,4 +1,4 @@
-@extends('layouts.app')
+ @extends('layouts.app')
 @section('title', 'Dashboard')
 @section('breadcrumb', 'Dashboard / Ringkasan Budget')
 
@@ -253,7 +253,7 @@ new Chart(ctx, {
             }
         ]
     },
-    options: {
+    options: {   
         responsive: true,
         maintainAspectRatio: true,
         plugins: {
