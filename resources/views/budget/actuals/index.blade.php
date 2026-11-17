@@ -150,17 +150,17 @@
                         </div>
                         <div class="col-12">
                             <label class="form-label-dark">Departemen</label>
-                            <select name="department_id" id="actualDeptSelect" class="form-select form-select-dark select2-actual-dept" onchange="loadActualLocations(this.value)" required>
+                            <select name="department_id" id="actualDeptSelect" class="form-select form-select-dark select2-actual-dept" onchange="loadActualData(this.value)" required>
                                 <option value="">-- Pilih Departemen --</option>
                                 @foreach($departments as $dept)
-                                <option value="{{ $dept->id }}" {{ auth()->user()->department_id == $dept->id ? 'selected' : '' }}>{{ $dept->dept_name }}</option>
+                                <option value="{{ $dept->id }}" {{ (auth()->user()->department_id == $dept->id) ? 'selected' : '' }}>{{ $dept->dept_name }}</option>
                                 @endforeach
                             </select>
                         </div>
                         <div class="col-12">
                             <label class="form-label-dark">Item</label>
-                            <select name="item_id" class="form-select form-select-dark select2-actual-item" required>
-                                <option value="">-- Pilih Item --</option>
+                            <select name="item_id" id="actualItemSelect" class="form-select form-select-dark select2-actual-item" data-placeholder="-- Pilih Item --" required>
+                                <option value=""></option>
                                 @foreach($items as $item)
                                 <option value="{{ $item->id }}">{{ $item->item_code }} — {{ $item->item_name }} @if($item->unit_price > 0)(Rp {{ number_format($item->unit_price, 0, ',', '.') }}/{{ $item->unit }})@endif</option>
                                 @endforeach
@@ -246,6 +246,9 @@
         color: var(--text-primary) !important;
         background-color: var(--bg-dark) !important;
     }
+    .select2-container {
+        z-index: 1060 !important;
+    }
 </style>
 @endpush
 
@@ -260,7 +263,8 @@ $(document).ready(function() {
             search: 'Cari:', lengthMenu: 'Tampilkan _MENU_ data',
             info: 'Menampilkan _START_ - _END_ dari _TOTAL_ data',
             paginate: { previous: '‹', next: '›' }
-        }
+        },
+        dom: 'lfrtip',
     });
 
     $('.select2-actual-dept').select2({
@@ -272,9 +276,17 @@ $(document).ready(function() {
     $('.select2-actual-item').select2({
         theme: 'bootstrap-5',
         dropdownParent: $('#addActualModal'),
-        width: '100%'
+        width: '100%',
+        placeholder: '-- Pilih Item --',
+        allowClear: true,
+        minimumResultsForSearch: 0
     });
 });
+
+function loadActualData(deptId) {
+    loadActualLocations(deptId);
+    loadActualDepartmentItems(deptId);
+}
 
 function loadActualLocations(deptId) {
     if (!deptId) return;
@@ -284,11 +296,60 @@ function loadActualLocations(deptId) {
             const sel = document.getElementById('actualLocationSelect');
             sel.innerHTML = '<option value="">GENERAL</option>';
             data.forEach(loc => {
-                sel.innerHTML += `<option value="${loc.id}">${loc.location_name}</option>`;
+                sel.innerHTML += `<option value="${loc.id}">${loc.location_name}${loc.is_default ? ' ★' : ''}</option>`;
             });
         });
 }
+
+function loadActualDepartmentItems(deptId) {
+    const itemSelect = $('#actualItemSelect');
+    const period = document.querySelector('input[name="transaction_date"]').value.substring(0, 7);
+    if (!itemSelect.length) return;
+
+    if (!deptId) {
+        itemSelect.html('<option value="">-- Pilih Departemen Terlebih Dahulu --</option>').trigger('change');
+        return;
+    }
+
+    itemSelect.html('<option value=""></option>').trigger('change');
+    fetch('/api/departments/' + deptId + '/items?period=' + period)
+        .then(r => r.json())
+        .then(data => {
+            if (data.length === 0) {
+                itemSelect.html('<option value="">-- Tidak Ada Item untuk Departemen Ini --</option>').trigger('change');
+                return;
+            }
+            let options = '<option value=""></option>';
+            data.forEach(item => {
+                const priceFormatted = item.unit_price > 0 ? ` (Rp ${Number(item.unit_price).toLocaleString('id-ID')}/${item.unit})` : '';
+                options += `<option value="${item.id}">${item.item_code} — ${item.item_name}${priceFormatted}</option>`;
+            });
+            itemSelect.html(options).trigger('change');
+            itemSelect.select2({
+                theme: 'bootstrap-5',
+                dropdownParent: $('#addActualModal'),
+                width: '100%',
+                placeholder: '-- Pilih Item --',
+                allowClear: true,
+                minimumResultsForSearch: 0
+            });
+        })
+        .catch(() => {
+            itemSelect.html('<option value="">Gagal memuat item</option>').trigger('change');
+        });
+}
+
 const initDept = document.getElementById('actualDeptSelect')?.value;
-if (initDept) loadActualLocations(initDept);
+if (initDept) {
+    loadActualLocations(initDept);
+    // If select2 is already initialized, we can load items
+    setTimeout(() => {
+        loadActualDepartmentItems(initDept);
+    }, 200);
+}
+
+$('#actualDeptSelect').on('select2:select', function (e) {
+    loadActualData(e.params.data.id);
+});
 </script>
 @endpush

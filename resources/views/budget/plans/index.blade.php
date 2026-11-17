@@ -159,8 +159,8 @@
                     </div>
                     <div class="mb-3">
                         <label class="form-label-dark">Item</label>
-                        <select name="item_id" id="planItemSelect" class="form-select form-select-dark select2-plan-item" required>
-                            <option value="">-- Pilih Item --</option>
+                        <select name="item_id" id="planItemSelect" class="form-select form-select-dark select2-plan-item" data-placeholder="-- Pilih Item --" required>
+                            <option value=""></option>
                             @foreach($items as $item)
                             <option value="{{ $item->id }}">{{ $item->item_code }} — {{ $item->item_name }} ({{ $item->unit }})</option>
                             @endforeach
@@ -287,6 +287,9 @@
         color: var(--text-primary) !important;
         background-color: var(--bg-dark) !important;
     }
+    .select2-container {
+        z-index: 1060 !important;
+    }
 </style>
 @endpush
 
@@ -314,7 +317,9 @@ $(document).ready(function() {
     $('.select2-plan-item').select2({
         theme: 'bootstrap-5',
         dropdownParent: $('#addPlanModal'),
-        width: '100%'
+        width: '100%',
+        placeholder: '-- Pilih Item --',
+        allowClear: true
     });
 
     $('.select2-filter').select2({
@@ -362,7 +367,7 @@ function loadDepartmentItems(deptId) {
         return;
     }
 
-    itemSelect.html('<option value="">Memuat item...</option>').trigger('change');
+    itemSelect.html('<option value=""></option>').trigger('change');
     fetch('/api/departments/' + deptId + '/items?period=' + period)
         .then(r => r.json())
         .then(data => {
@@ -370,7 +375,7 @@ function loadDepartmentItems(deptId) {
                 itemSelect.html('<option value="">-- Tidak Ada Item untuk Departemen Ini --</option>').trigger('change');
                 return;
             }
-            let options = '<option value="">-- Pilih Item --</option>';
+            let options = '<option value=""></option>';
             data.forEach(item => {
                 const plannedLabel = item.is_planned ? ' [SUDAH DI-PLAN]' : '';
                 const disabled = item.is_planned ? 'disabled' : '';
